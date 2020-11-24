@@ -17,11 +17,17 @@ namespace BusBookingApp.Data
         public bool Hidden { get; set; } = false;
         //public virtual ICollection<UserClaim> Claims { get; set; }
         //public virtual ICollection<UserLogin> Logins { get; set; }
-        //public virtual ICollection<UserToken> Tokens { get; set; }
         //public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<UserToken> Tokens { get; set; }
+        
         [NotMapped]
         public string Password { get; set; }
         [NotMapped]
         public string Role { get; set; }
+    }
+
+    public class UserToken : IdentityUserToken<string>
+    {
+        public virtual User User { get; set; }
     }
 }
