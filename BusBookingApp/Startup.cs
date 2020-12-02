@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BusBookingApp.Data;
+using BusBookingApp.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +32,8 @@ namespace BusBookingApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IGeneralRepository, GeneralRepository>();
+
             //For Entity FrameWork
             var connection = Configuration.GetConnectionString("BusBooking");
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));

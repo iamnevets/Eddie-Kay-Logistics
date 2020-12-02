@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Web.Http.ModelBinding;
 
 namespace BusBookingApp.Helpers
 {
@@ -95,12 +93,12 @@ namespace BusBookingApp.Helpers
         /// </summary>
         /// <param name="values">The ASP.NET MVC model state values.</param>
         /// <returns></returns>
-        public static string ProcessException(ICollection<ModelState> values)
-        {
-            var msg = values.SelectMany(modelState => modelState.Errors)
-                .Aggregate("", (current, error) => current + error.ErrorMessage + "\n");
-            return msg;
-        }
+        //public static string ProcessException(ICollection<ModelState> values)
+        //{
+        //    var msg = values.SelectMany(modelState => modelState.Errors)
+        //        .Aggregate("", (current, error) => current + error.ErrorMessage + "\n");
+        //    return msg;
+        //}
 
         /// <summary>
         /// Processes the exception.

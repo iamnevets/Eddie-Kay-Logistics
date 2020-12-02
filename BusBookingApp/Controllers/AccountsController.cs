@@ -7,10 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using BusBookingApp.Data;
 using BusBookingApp.Helpers;
+using BusBookingApp.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using static BusBookingApp.Data.Models.AccountModels;
@@ -27,14 +29,19 @@ namespace BusBookingApp.Controllers
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly ApplicationDbContext _dbContext;
 
-        public AccountsController(IServiceProvider serviceProvider, IConfiguration configuration, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, SignInManager<User> signInManager)
+        private readonly UserRepository _userRepository;
+
+        public AccountsController(IServiceProvider serviceProvider, IConfiguration configuration, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, SignInManager<User> signInManager, ApplicationDbContext dbContext)
         {
             _serviceProvider = serviceProvider;
             _configuration = configuration;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
+            _dbContext = dbContext;
+            _userRepository = new UserRepository(_dbContext);
         }
 
         #region Login
@@ -103,10 +110,133 @@ namespace BusBookingApp.Controllers
         }
         #endregion Login
 
+
         #region Create user or SignUp
-        //[HttpPost]
-        //[Route("login")]
-        //[AllowAnonymous]
+        [HttpPost]
+        [Route("signup")]
+        [AllowAnonymous]
+        public async Task<ActionResult> CreateUser(User userModel)
+        {
+            try
+            {
+                userModel.Id = Guid.NewGuid().ToString();
+
+                var result = await _userManager.CreateAsync(userModel, userModel.Password).ConfigureAwait(true);
+
+                if (result.Succeeded)
+                {
+                    var user = _userManager.FindByNameAsync(userModel.UserName).Result;
+                    //Add to role
+                    var rslt = _userManager.AddToRoleAsync(user, userModel.Role);
+                }
+                else
+                    return BadRequest(WebHelpers.ProcessException(result));
+
+                return Created("CreateUser", new { userModel.Id, Message = "User has been created Successfully" });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(WebHelpers.ProcessException(e));
+            }
+        }
         #endregion
+
+
+        #region UpdateUser
+
+        [HttpPut]
+        [Route("updateuser")]
+        public async Task<ActionResult> UpdateUser(User UserModel)
+        {
+            try
+            {
+                var user = _userRepository.Get(UserModel.Id);
+
+                if (user == null) return NotFound("User not found. Please update an existing user");
+
+                if(await _userRepository.Update(user))
+                    return Created("UpdateUser", new { user.Id, Message = "User has been updated successfully" });
+
+                return BadRequest("Could not update user");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(WebHelpers.ProcessException(e));
+            }
+        }
+
+        #endregion UpdateUser
+
+
+        #region DeleteUser
+        [HttpDelete]
+        [Route("DeleteUser")]
+        public async Task<ActionResult> Delete(string id)
+        {
+            try
+            {
+                var userToDelete = _userRepository.Get(id);
+                if (userToDelete == null) return NotFound("User not found!");
+
+                _userRepository.Delete(userToDelete);
+                if(await _userRepository.SaveChangesAsync())
+                    return Ok(new { Message = "User Deleted Successfully." });
+
+                return BadRequest("Failed to delete user");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(WebHelpers.ProcessException(ex));
+            }
+        }
+        #endregion DeleteUser
+
+
+        #region GetUsers
+
+        [HttpGet]
+        [Route("GetUsers")]
+        public ActionResult GetUsers()
+        {
+            try
+            {
+                var result = _userRepository.GetAll();
+                var data = result.Select(x => new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Email,
+                    x.PhoneNumber,
+                    x.UserName,
+                    x.StudentId
+                });
+
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(WebHelpers.ProcessException(e));
+            }
+        }
+
+        #endregion GetUsers
+
+
+        #region Logout
+        [HttpGet]
+        [Route("logout")]
+        public async Task<ActionResult> Logout()
+        {
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return Ok(new { Message = "User Logged Out" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(WebHelpers.ProcessException(ex));
+            }
+        }
+        #endregion Logout
     }
 }
