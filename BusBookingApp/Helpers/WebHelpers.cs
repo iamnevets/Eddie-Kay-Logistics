@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BusBookingApp.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,6 +10,11 @@ namespace BusBookingApp.Helpers
 {
     public class WebHelpers
     {
+        public static ReturnObject GetReturnObject(object data, bool success, string message)
+        {
+            return new ReturnObject() { Data = data, Success = success, Message = message };
+        }
+
         /// <summary>
         /// Builds the erroe message
         /// </summary>

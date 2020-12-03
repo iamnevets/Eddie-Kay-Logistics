@@ -34,14 +34,10 @@ namespace BusBookingApp.Controllers
 
         private readonly UserRepository _userRepository;
 
-        public AccountsController(IServiceProvider serviceProvider, IConfiguration configuration/*, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager, ApplicationDbContext dbContext*/)
+        public AccountsController(IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
             _configuration = configuration;
-            //_userManager = userManager;
-            //_roleManager = roleManager;
-            //_signInManager = signInManager;
-            //_dbContext = dbContext;
             _userManager = serviceProvider.GetService<UserManager<User>>();
             _roleManager = serviceProvider.GetService<RoleManager<Role>>();
             _dbContext = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
@@ -96,18 +92,13 @@ namespace BusBookingApp.Controllers
                             Token = tokenResponse
                         };
 
-                        return Ok(new
-                        {
-                            data,
-                            Message = "Login successful",
-                            Success = true
-                        });
+                        return Ok(WebHelpers.GetReturnObject(data, true, "user logged in successfully"));
                     }
 
-                    return BadRequest("Invalid username or password");
+                    return BadRequest(WebHelpers.GetReturnObject(null, false, "Invalid username or password"));
                 }
 
-                return BadRequest("Invalid username or password");
+                return BadRequest(WebHelpers.GetReturnObject(null, false, "Invalid username or password"));
             }
             catch (Exception e)
             {
@@ -128,17 +119,18 @@ namespace BusBookingApp.Controllers
                 userModel.Id = Guid.NewGuid().ToString();
 
                 var result = await _userManager.CreateAsync(userModel, userModel.Password).ConfigureAwait(true);
+                User user;
 
                 if (result.Succeeded)
                 {
-                    var user = _userManager.FindByNameAsync(userModel.UserName).Result;
+                    user = _userManager.FindByNameAsync(userModel.UserName).Result;
                     //Add to role
                     var rslt = _userManager.AddToRoleAsync(user, userModel.Role);
                 }
                 else
                     return BadRequest(WebHelpers.ProcessException(result));
 
-                return Created("CreateUser", new { userModel.Id, Message = "User has been created Successfully" });
+                return Created("CreateUser", WebHelpers.GetReturnObject(user, true, "User has been created successfully"));
             }
             catch (Exception e)
             {
@@ -158,12 +150,12 @@ namespace BusBookingApp.Controllers
             {
                 var user = _userRepository.Get(UserModel.Id);
 
-                if (user == null) return NotFound("User not found. Please update an existing user");
+                if (user == null) return NotFound(WebHelpers.GetReturnObject(null, false, "User not found. Please update an existing user"));
 
                 if(await _userRepository.Update(user))
-                    return Created("UpdateUser", new { user.Id, Message = "User has been updated successfully" });
+                    return Created("UpdateUser", WebHelpers.GetReturnObject(null, true, "User has been updated successfully"));
 
-                return BadRequest("Could not update user");
+                return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update user"));
             }
             catch (Exception e)
             {
@@ -182,13 +174,13 @@ namespace BusBookingApp.Controllers
             try
             {
                 var userToDelete = _userRepository.Get(id);
-                if (userToDelete == null) return NotFound("User not found!");
+                if (userToDelete == null) return NotFound(WebHelpers.GetReturnObject(null, false, "User not found"));
 
                 _userRepository.Delete(userToDelete);
                 if(await _userRepository.SaveChangesAsync())
-                    return Ok(new { Message = "User Deleted Successfully." });
+                    return Ok(WebHelpers.GetReturnObject(null, true, "User deleted successfully"));
 
-                return BadRequest("Failed to delete user");
+                return BadRequest(WebHelpers.GetReturnObject(null, false, "Failed to delete user"));
             }
             catch (Exception ex)
             {
@@ -217,7 +209,7 @@ namespace BusBookingApp.Controllers
                     x.StudentId
                 });
 
-                return Ok(data);
+                return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
             }
             catch (Exception e)
             {
@@ -236,7 +228,7 @@ namespace BusBookingApp.Controllers
             try
             {
                 await _signInManager.SignOutAsync();
-                return Ok(new { Message = "User Logged Out" });
+                return Ok(WebHelpers.GetReturnObject(null, true, "User logged out successfully"));
             }
             catch (Exception ex)
             {
