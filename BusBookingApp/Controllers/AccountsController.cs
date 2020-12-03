@@ -22,7 +22,7 @@ namespace BusBookingApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class AccountsController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;
