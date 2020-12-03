@@ -15,7 +15,7 @@ namespace BusBookingApp.Data
         public static void Initialize(IServiceProvider serviceProvider)
         {
             var userManager = serviceProvider.GetService<UserManager<User>>();
-            var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
+            var roleManager = serviceProvider.GetService<RoleManager<Role>>();
             var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
 
             using (context)
@@ -34,7 +34,7 @@ namespace BusBookingApp.Data
                             Privileges.CanUpdateBus,
                             Privileges.CanDeleteBus
                 };
-                var adminRole = new IdentityRole { Name = "Administrator", NormalizedName = "Administrator" };
+                var adminRole = new Role { Name = "Administrator", NormalizedName = "Administrator" };
                 var existingAdminRole = context.Roles.FirstOrDefault(x => x.Name == adminRole.Name);
                 if (existingAdminRole == null)
                 {
@@ -52,7 +52,7 @@ namespace BusBookingApp.Data
                         var exst = context.RoleClaims.FirstOrDefault(x => x.RoleId == existingAdminRole.Id && privilege == x.ClaimValue);
                         if (exst == null)
                         {
-                            var newClaim = new IdentityRoleClaim<string> { RoleId = existingAdminRole.Id, ClaimValue = privilege, ClaimType = "Privilege" };
+                            var newClaim = new RoleClaim { RoleId = existingAdminRole.Id, ClaimValue = privilege, ClaimType = "Privilege" };
                             context.RoleClaims.Add(newClaim);
                             context.SaveChanges();
                             var a = newClaim;
@@ -67,7 +67,7 @@ namespace BusBookingApp.Data
                     Privileges.CanViewTicket
                 };
 
-                var endUserRole = new IdentityRole { Name = "EndUser", NormalizedName = "EndUser" };
+                var endUserRole = new Role { Name = "EndUser", NormalizedName = "EndUser" };
                 var existingEndUserRole = context.Roles.FirstOrDefault(x => x.Name == endUserRole.Name);
                 if (existingEndUserRole == null)
                 {
@@ -85,7 +85,7 @@ namespace BusBookingApp.Data
                         var exists = context.RoleClaims.FirstOrDefault(x => x.RoleId == existingEndUserRole.Id && privilege == x.ClaimValue);
                         if (exists == null)
                         {
-                            var newClaim = new IdentityRoleClaim<string> { RoleId = existingEndUserRole.Id, ClaimValue = privilege, ClaimType = "Privilege" };
+                            var newClaim = new RoleClaim { RoleId = existingEndUserRole.Id, ClaimValue = privilege, ClaimType = "Privilege" };
                             context.RoleClaims.Add(newClaim);
                             context.SaveChanges();
                             var a = newClaim;

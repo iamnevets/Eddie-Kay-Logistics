@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using static BusBookingApp.Data.Models.AccountModels;
 
@@ -21,26 +22,30 @@ namespace BusBookingApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class AccountsController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ApplicationDbContext _dbContext;
 
         private readonly UserRepository _userRepository;
 
-        public AccountsController(IServiceProvider serviceProvider, IConfiguration configuration, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, SignInManager<User> signInManager, ApplicationDbContext dbContext)
+        public AccountsController(IServiceProvider serviceProvider, IConfiguration configuration/*, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager, ApplicationDbContext dbContext*/)
         {
             _serviceProvider = serviceProvider;
             _configuration = configuration;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _signInManager = signInManager;
-            _dbContext = dbContext;
+            //_userManager = userManager;
+            //_roleManager = roleManager;
+            //_signInManager = signInManager;
+            //_dbContext = dbContext;
+            _userManager = serviceProvider.GetService<UserManager<User>>();
+            _roleManager = serviceProvider.GetService<RoleManager<Role>>();
+            _dbContext = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
+            _signInManager = serviceProvider.GetService<SignInManager<User>>();
             _userRepository = new UserRepository(_dbContext);
         }
 
@@ -62,9 +67,10 @@ namespace BusBookingApp.Controllers
 
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.Name, user.UserName),
-                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                            new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
+                            new Claim("Id", user.Id),
+                            new Claim("UserName", user.UserName),
+                            //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                            //new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
                         };
 
                         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));

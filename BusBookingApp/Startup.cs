@@ -39,7 +39,7 @@ namespace BusBookingApp
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
 
             //For Identity
-            services.AddIdentity<User, IdentityRole>(options =>
+            services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
