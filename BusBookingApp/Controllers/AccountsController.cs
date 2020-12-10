@@ -9,7 +9,6 @@ using BusBookingApp.Data;
 using BusBookingApp.Helpers;
 using BusBookingApp.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -143,16 +142,16 @@ namespace BusBookingApp.Controllers
         #region UpdateUser
 
         [HttpPut]
-        [Route("updateuser")]
-        public async Task<ActionResult> UpdateUser(User UserModel)
+        [Route("{userId}")]
+        public async Task<ActionResult> UpdateUser(string userId, User user)
         {
             try
             {
-                var user = _userRepository.Get(UserModel.Id);
+                var userToUpdate = _userRepository.Get(userId);
 
-                if (user == null) return NotFound(WebHelpers.GetReturnObject(null, false, "User not found. Please update an existing user"));
+                if (userToUpdate == null) return NotFound(WebHelpers.GetReturnObject(null, false, "User not found. Please update an existing user"));
 
-                if(await _userRepository.Update(user))
+                if(await _userRepository.Update(userToUpdate, user))
                     return Created("UpdateUser", WebHelpers.GetReturnObject(null, true, "User has been updated successfully"));
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update user"));
@@ -168,13 +167,13 @@ namespace BusBookingApp.Controllers
 
         #region DeleteUser
         [HttpDelete]
-        [Route("DeleteUser")]
-        public async Task<ActionResult> Delete(string id)
+        [Route("{userId}")]
+        public async Task<ActionResult> Delete(string userId)
         {
             try
             {
-                var userToDelete = _userRepository.Get(id);
-                if (userToDelete == null) return NotFound(WebHelpers.GetReturnObject(null, false, "User not found"));
+                var userToDelete = _userRepository.Get(userId);
+                if (userToDelete == null) return NotFound(WebHelpers.GetReturnObject(null, false, "User not found. Please delete an existing user"));
 
                 _userRepository.Delete(userToDelete);
                 if(await _userRepository.SaveChangesAsync())
@@ -193,7 +192,7 @@ namespace BusBookingApp.Controllers
         #region GetUsers
 
         [HttpGet]
-        [Route("GetUsers")]
+        //[Route("get")]
         public ActionResult GetUsers()
         {
             try
@@ -223,6 +222,7 @@ namespace BusBookingApp.Controllers
         #region Logout
         [HttpGet]
         [Route("logout")]
+        [AllowAnonymous]
         public async Task<ActionResult> Logout()
         {
             try

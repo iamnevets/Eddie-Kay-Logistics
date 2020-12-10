@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BusBookingApp.Data.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BusBookingApp.Data
 {
@@ -15,12 +11,14 @@ namespace BusBookingApp.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> Users { get; set; }
+        public DbSet<Bus> Buses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Bus>().HasIndex(b => b.BusNumber).IsUnique();
             //builder.Entity<IdentityUserRole<Guid>>().HasKey(p => new { p.UserId, p.RoleId });
         }
     }

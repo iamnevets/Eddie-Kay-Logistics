@@ -27,10 +27,10 @@ namespace BusBookingApp.Repositories
             return _dbContext.Users.ToList();
         }
 
-        public async Task<bool> Update(User user)
+        public async Task<bool> Update(User userToUpdate, User user)
         {
-            var userToUpdate = _dbContext.Users.Find(user.Id);
-            if (userToUpdate == null) throw new Exception("User not found to update.");
+            //var userToUpdate = _dbContext.Users.Find(user.Id);
+            //if (userToUpdate == null) throw new Exception("User not found to update.");
             userToUpdate.Name = user.Name;
             userToUpdate.Email = user.Email;
             userToUpdate.StudentId = user.StudentId;
