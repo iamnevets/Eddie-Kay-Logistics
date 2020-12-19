@@ -16,9 +16,8 @@ namespace BusBookingApp.Data
         {
             var userManager = serviceProvider.GetService<UserManager<User>>();
             var roleManager = serviceProvider.GetService<RoleManager<Role>>();
-            var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
-
-            using (context)
+            
+            using (var context = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
                 #region Roles
 
@@ -113,6 +112,8 @@ namespace BusBookingApp.Data
                     }
                 }
                 #endregion
+
+                context.SaveChanges();
             }
         }
     }

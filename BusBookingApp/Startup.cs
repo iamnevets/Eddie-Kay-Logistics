@@ -27,6 +27,7 @@ namespace BusBookingApp
         {
             services.AddScoped<IGeneralRepository, GeneralRepository>();
             services.AddScoped<IBusRepository, BusRepository>();
+            services.AddScoped<IBusTicketRepository, BusTicketRepository>();
 
             //For Entity FrameWork
             var connection = Configuration.GetConnectionString("BusBooking");
@@ -66,6 +67,7 @@ namespace BusBookingApp
                 };
             });
 
+            services.AddHttpContextAccessor();
             services.AddControllers();
         }
 

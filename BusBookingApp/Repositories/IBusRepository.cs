@@ -8,8 +8,8 @@ namespace BusBookingApp.Repositories
 {
     public interface IBusRepository : IGeneralRepository
     {
-        Task<Bus> GetBusAsync(int busId);
-        Task<List<Bus>> GetAllBusesAsync();
-        Task<bool> UpdateBusAsync(Bus busToUpdate, Bus bus);
+        //Task<Bus> GetBusAsync(int busId);
+        //Task<List<Bus>> GetAllBusesAsync();
+        //Task<bool> UpdateBusAsync(Bus busToUpdate, Bus bus);
     }
 }

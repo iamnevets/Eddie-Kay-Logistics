@@ -58,6 +58,8 @@ namespace BusBookingApp.Controllers
                     var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, loginModel.RememberMe);
                     if (result.Succeeded)
                     {
+                        user = _dbContext.Users.Where(x => x.Id == user.Id).Include(x => x.UserRoles).Include(x => x.Claims).FirstOrDefault();
+                        var role = _dbContext.Roles.Where(x => x.Id == user.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault();
                         var userRoles = await _userManager.GetRolesAsync(user);
 
                         var claims = new List<Claim>
@@ -87,7 +89,7 @@ namespace BusBookingApp.Controllers
                             user.Name,
                             user.Email,
                             user.PhoneNumber,
-                            user.Role,
+                            Role = role.Name,
                             Token = tokenResponse
                         };
 

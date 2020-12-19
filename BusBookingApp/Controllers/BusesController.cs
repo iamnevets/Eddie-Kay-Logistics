@@ -43,7 +43,7 @@ namespace BusBookingApp.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                return StatusCode(StatusCodes.Status500InternalServerError, WebHelpers.ProcessException(e));
             }
         }
 
@@ -52,7 +52,8 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var bus = await _busRepository.GetBusAsync(busId);
+                //var bus = await _busRepository.GetBusAsync(busId);
+                var bus = await _busRepository.GetAsync<Bus>(busId);
                 if (bus == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Could not find the bus"));
 
@@ -70,7 +71,8 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var data = await _busRepository.GetAllBusesAsync();
+                //var data = await _busRepository.GetAllBusesAsync();
+                var data = await _busRepository.GetAllAsync<Bus>();
                 return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
             }
             catch (Exception e)
@@ -84,11 +86,11 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var busToUpdate = await _busRepository.GetBusAsync(busId);
+                var busToUpdate = await _busRepository.GetAsync<Bus>(busId);
                 if (busToUpdate == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Bus could not be found. Please update an existing bus!"));
 
-                if (await _busRepository.UpdateBusAsync(busToUpdate, bus))
+                if (await _busRepository.UpdateAsync(bus))
                     return Created("api/buses/update", WebHelpers.GetReturnObject(bus, true, "Bus has been updated successfully"));
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update bus"));
@@ -104,7 +106,7 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var busToDelete = await _busRepository.GetBusAsync(busId);
+                var busToDelete = await _busRepository.GetAsync<Bus>(busId);
                 if (busToDelete == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Bus could not be found. Please delete an existing bus!"));
 
