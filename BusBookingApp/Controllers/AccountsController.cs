@@ -60,14 +60,14 @@ namespace BusBookingApp.Controllers
                     {
                         user = _dbContext.Users.Where(x => x.Id == user.Id).Include(x => x.UserRoles).Include(x => x.Claims).FirstOrDefault();
                         var role = _dbContext.Roles.Where(x => x.Id == user.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault();
-                        var userRoles = await _userManager.GetRolesAsync(user);
+                        var roleClaims = role.RoleClaims.Select(x => x.ClaimValue).Distinct().ToList();  //Roleclaims are the privileges
+
+                        //var userRoles = await _userManager.GetRolesAsync(user);
 
                         var claims = new List<Claim>
                         {
                             new Claim("Id", user.Id),
-                            new Claim("UserName", user.UserName),
-                            //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                            //new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
+                            new Claim("UserName", user.UserName)
                         };
 
                         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -90,6 +90,7 @@ namespace BusBookingApp.Controllers
                             user.Email,
                             user.PhoneNumber,
                             Role = role.Name,
+                            Privileges = roleClaims,
                             Token = tokenResponse
                         };
 
