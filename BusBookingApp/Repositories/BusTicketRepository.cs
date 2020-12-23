@@ -31,11 +31,11 @@ namespace BusBookingApp.Repositories
 
         public string CreateTicketNumber()
         {
-            var time = DateTime.UtcNow.ToString();
+            var time = DateTime.UtcNow.Date.ToString();
 
             var lastThreeDigitsOfPhoneNumber = _currentUser.PhoneNumber.Substring(6, 3);
 
-            var ticketNumber = $"GH{time}{lastThreeDigitsOfPhoneNumber}";
+            var ticketNumber = $"GH-{time}-{lastThreeDigitsOfPhoneNumber}";
             return ticketNumber;
         }
 
@@ -46,7 +46,7 @@ namespace BusBookingApp.Repositories
 
         public User GetCurrentUser()
         {
-            var currentUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var currentUserId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value;
             var currentUser = _dbContext.Users.FirstOrDefault(u => u.Id == currentUserId);
 
             return currentUser;

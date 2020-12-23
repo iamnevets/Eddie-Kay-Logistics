@@ -59,6 +59,7 @@ namespace BusBookingApp.Controllers
                     if (result.Succeeded)
                     {
                         user = _dbContext.Users.Where(x => x.Id == user.Id).Include(x => x.UserRoles).Include(x => x.Claims).FirstOrDefault();
+
                         var role = _dbContext.Roles.Where(x => x.Id == user.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault();
                         var roleClaims = role.RoleClaims.Select(x => x.ClaimValue).Distinct().ToList();  //Roleclaims are the privileges
 
@@ -127,7 +128,12 @@ namespace BusBookingApp.Controllers
                 {
                     user = _userManager.FindByNameAsync(userModel.UserName).Result;
                     //Add to role
-                    var rslt = _userManager.AddToRoleAsync(user, userModel.Role);
+                    //var rslt = _userManager.AddToRoleAsync(user, userModel.Role);
+                    if (string.IsNullOrEmpty(userModel.Role))
+                    {
+                        _userManager.AddToRoleAsync(user, "EndUser").Wait();
+                        //user.Role = _dbContext.Roles.Where(x => x.Id == user.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault().Name;
+                    }
                 }
                 else
                     return BadRequest(WebHelpers.ProcessException(result));
