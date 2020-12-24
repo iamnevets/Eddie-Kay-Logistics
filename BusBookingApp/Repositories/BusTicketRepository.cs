@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BusBookingApp.Repositories
@@ -31,11 +30,13 @@ namespace BusBookingApp.Repositories
 
         public string CreateTicketNumber()
         {
-            var time = DateTime.UtcNow.Date.ToString();
+            var time = DateTime.UtcNow.ToString("hh:mm:ss").Replace(":", "");
+            var date = DateTime.UtcNow.Date.ToShortDateString().Replace("/", "");
+            Console.WriteLine(date);
 
             var lastThreeDigitsOfPhoneNumber = _currentUser.PhoneNumber.Substring(6, 3);
 
-            var ticketNumber = $"GH-{time}-{lastThreeDigitsOfPhoneNumber}";
+            var ticketNumber = $"GH-{date}-{time}-{lastThreeDigitsOfPhoneNumber}";
             return ticketNumber;
         }
 
