@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using BusBookingApp.Data;
-using BusBookingApp.PayStackApi.Repositories;
+//using BusBookingApp.PayStackApi.Repositories;
 using BusBookingApp.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -30,10 +30,10 @@ namespace BusBookingApp
             services.AddScoped<IGeneralRepository, GeneralRepository>();
             services.AddScoped<IBusRepository, BusRepository>();
             services.AddScoped<IBusTicketRepository, BusTicketRepository>();
-            services.AddScoped<ITransactionRepository, TransactionRepository>();
+            //services.AddScoped<ITransactionRepository, TransactionRepository>();
 
             //For Entity FrameWork
-            var connection = Configuration.GetConnectionString("BusBooking");
+            var connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
 
             //For Identity
