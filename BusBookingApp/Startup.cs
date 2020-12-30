@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 
 namespace BusBookingApp
 {
@@ -74,6 +75,9 @@ namespace BusBookingApp
             {
                 options.AddDefaultPolicy(builder =>
                 {
+                    builder.WithOrigins("http://localhost", "ionic://localhost")
+                    .WithHeaders(HeaderNames.AccessControlAllowOrigin, "*")
+                    .AllowAnyMethod();
                     builder.AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader();
