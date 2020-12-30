@@ -70,22 +70,22 @@ namespace BusBookingApp
                 };
             });
 
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-                });
-            });
+            //services.AddCors(options =>
+            //{
+            //    options.AddDefaultPolicy(builder =>
+            //    {
+            //        builder.AllowAnyOrigin()
+            //        .AllowAnyMethod()
+            //        .AllowAnyHeader();
+            //    });
+            //});
             services.AddHttpContextAccessor();
-            services.AddHttpClient("paystack", c =>
-            {
-                c.BaseAddress = new Uri("https://api.paystack.co/transaction");
-                c.DefaultRequestHeaders.Add("Accept", "application/json");
-                c.DefaultRequestHeaders.Add("Authorization", $"Bearer {Configuration.GetSection("PayStackService").GetSection("SecretKey").Value}");
-            });
+            //services.AddHttpClient("paystack", c =>
+            //{
+            //    c.BaseAddress = new Uri("https://api.paystack.co/transaction");
+            //    c.DefaultRequestHeaders.Add("Accept", "application/json");
+            //    c.DefaultRequestHeaders.Add("Authorization", $"Bearer {Configuration.GetSection("PayStackService").GetSection("SecretKey").Value}");
+            //});
 
             services.AddControllers().AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
@@ -104,7 +104,7 @@ namespace BusBookingApp
 
             app.UseRouting();
 
-            app.UseCors();
+            //app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();
