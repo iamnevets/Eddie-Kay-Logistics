@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BusBookingApp.Data;
 using BusBookingApp.Data.Models;
 using BusBookingApp.Helpers;
 using BusBookingApp.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusBookingApp.Controllers
 {
@@ -17,10 +19,12 @@ namespace BusBookingApp.Controllers
     public class BusTicketsController : ControllerBase
     {
         private readonly IBusTicketRepository _busTicketRepository;
+        private readonly ApplicationDbContext _dbContext;
 
-        public BusTicketsController(IBusTicketRepository busTicketRepository)
+        public BusTicketsController(IBusTicketRepository busTicketRepository, ApplicationDbContext dbContext)
         {
             _busTicketRepository = busTicketRepository;
+            _dbContext = dbContext;
         }
 
         [HttpPost]
@@ -68,8 +72,20 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                //remember to make it optional to get all tickets by user or not
-                var data = await _busTicketRepository.GetAllByUserAsync();
+                var currentUser = _busTicketRepository.GetCurrentUser();
+                var currentUserRole = _dbContext.Roles.Where(x => x.Id == currentUser.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault().Name;
+
+                // Get all bus tickets in the system if user is Admin, else only get the tickets for a particular user
+                List<BusTicket> data;
+                if (currentUserRole == "Administrator")
+                {
+                    data = await _busTicketRepository.GetAllAsync<BusTicket>();
+                    data = data.OrderBy(x => x.CreatedBy).ToList();
+                }
+                else
+                {
+                    data = await _busTicketRepository.GetAllByUserAsync();
+                }
                 return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
             }
             catch (Exception e)
