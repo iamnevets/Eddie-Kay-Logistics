@@ -44,7 +44,7 @@ namespace BusBookingApp.Repositories
         public User GetCurrentUser()
         {
             var currentUserId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value;
-            var currentUser = _dbContext.Users.FirstOrDefault(u => u.Id == currentUserId);
+            var currentUser = _dbContext.Users.Where(x => x.Id == currentUserId).Include(x => x.UserRoles).Include(x => x.Claims).FirstOrDefault();
 
             return currentUser;
         }

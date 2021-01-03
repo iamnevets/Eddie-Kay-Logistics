@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusBookingApp.Repositories
 {
-    public class DestinationRepository : GeneralRepository
+    public class DestinationRepository : GeneralRepository, IDestinationRepository
     {
         public DestinationRepository(ApplicationDbContext dbContext) : base(dbContext)
         {

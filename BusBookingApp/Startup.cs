@@ -33,6 +33,7 @@ namespace BusBookingApp
             services.AddScoped<IGeneralRepository, GeneralRepository>();
             services.AddScoped<IBusRepository, BusRepository>();
             services.AddScoped<IBusTicketRepository, BusTicketRepository>();
+            services.AddScoped<IDestinationRepository, DestinationRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
 
             //For Entity FrameWork
