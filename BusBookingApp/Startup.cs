@@ -1,6 +1,8 @@
 using System;
 using System.Text;
+using AutoMapper;
 using BusBookingApp.Data;
+using BusBookingApp.PayStackApi.Repositories;
 //using BusBookingApp.PayStackApi.Repositories;
 using BusBookingApp.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -31,7 +33,7 @@ namespace BusBookingApp
             services.AddScoped<IGeneralRepository, GeneralRepository>();
             services.AddScoped<IBusRepository, BusRepository>();
             services.AddScoped<IBusTicketRepository, BusTicketRepository>();
-            //services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
 
             //For Entity FrameWork
             var connection = Configuration.GetConnectionString("DefaultConnection");
@@ -91,6 +93,7 @@ namespace BusBookingApp
                 c.DefaultRequestHeaders.Add("Authorization", $"Bearer {Configuration.GetSection("PayStackService").GetSection("SecretKey").Value}");
             });
 
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers().AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );

@@ -1,4 +1,5 @@
-﻿using BusBookingApp.Data.Models;
+﻿using BusBookingApp.Data.DTOs;
+using BusBookingApp.Data.Models;
 using BusBookingApp.PayStackApi.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,6 @@ namespace BusBookingApp.Data
             builder.Entity<Bus>().HasIndex(b => b.BusNumber).IsUnique();
             builder.Entity<BusTicket>().HasIndex(b => b.TicketNumber).IsUnique();
 
-            builder.Entity<Metadata>().HasNoKey();
             //builder.Entity<IdentityUserRole<Guid>>().HasKey(p => new { p.UserId, p.RoleId });
 
             // Seed Data for Destination

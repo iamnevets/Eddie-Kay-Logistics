@@ -1,7 +1,9 @@
-﻿using BusBookingApp.PayStackApi;
+﻿using BusBookingApp.Data;
 using BusBookingApp.PayStackApi.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -10,19 +12,49 @@ namespace BusBookingApp.PayStackApi.Repositories
 {
     public class TransactionRepository : ITransactionRepository
     {
+        private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _clientFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly User _currentUser;
 
-        public TransactionRepository(IHttpClientFactory clientFactory)
+        public TransactionRepository(ApplicationDbContext dbContext, IHttpClientFactory clientFactory, IHttpContextAccessor httpContextAccessor)
         {
+            _dbContext = dbContext;
             _clientFactory = clientFactory;
+            _httpContextAccessor = httpContextAccessor;
+            _currentUser = GetCurrentUser();
         }
 
-        public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(PaymentTransaction transactionModel)
+        public User GetCurrentUser()
         {
+            var currentUserId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value;
+            var currentUser = _dbContext.Users.FirstOrDefault(u => u.Id == currentUserId);
+
+            return currentUser;
+        }
+
+        public string CreateTransactionReference()
+        {
+            var time = DateTime.UtcNow.ToString("hh:mm:ss").Replace(":", "");
+            var date = DateTime.UtcNow.Date.ToShortDateString().Replace("/", "");
+            Console.WriteLine(date);
+
+            var lastThreeDigitsOfPhoneNumber = _currentUser.PhoneNumber.Substring(6, 3);
+
+            var reference = $"GH-{date}-{time}-{lastThreeDigitsOfPhoneNumber}";
+            return reference;
+        }
+
+        public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(string callbackUrl, string amount)
+        {
+            var transactionReference = CreateTransactionReference();
+
             var values = new Dictionary<string, string>
             {
-                {"email", transactionModel.Email },
-                {"amount", transactionModel.Amount }
+                {"email", _currentUser.Email },
+                {"amount", amount},
+                {"reference", transactionReference },
+                {"callback_url",  callbackUrl}
             };
 
             var client = _clientFactory.CreateClient("paystack");
@@ -32,9 +64,7 @@ namespace BusBookingApp.PayStackApi.Repositories
             ResponseObject<TransactionInitializationResponseData> returnObject = null;
             if (response.IsSuccessStatusCode)
             {
-                //var responseData = await response.Content.ReadFromJsonAsync<ResponseObject<TransactionInitializationResponseData>>();
                 returnObject = await response.Content.ReadFromJsonAsync<ResponseObject<TransactionInitializationResponseData>>();
-                //returnObject = await VerifyPayment(responseData.Data.Reference);
             }
             else
             {

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BusBookingApp.Helpers;
 using BusBookingApp.PayStackApi.Models;
@@ -24,25 +22,66 @@ namespace BusBookingApp.PayStackApi.Controllers
             _transactionRepository = transactionRepository;
         }
         [HttpPost]
-        [Route("payment")]
-        public async Task<ActionResult> InitiatePayment(PaymentTransaction transactionModel)
+        public async Task<ActionResult> InitiatePayment(TransactionInitializationRequestBody requestBody)
         {
             try
             {
-                //transactionModel.PaymentTransactionId = Convert.ToInt64(DateTime.UtcNow.Date.ToShortDateString().Replace("/", ""));
-                _generalRepository.Add(transactionModel);
-
-                if (await _generalRepository.SaveChangesAsync())
+                if (!string.IsNullOrEmpty(requestBody.CallbackUrl) && !string.IsNullOrEmpty(requestBody.Amount))
                 {
-                    var transactionResponse = await _transactionRepository.InitiatePayment(transactionModel);
+                    var transactionResponse = await _transactionRepository.InitiatePayment(requestBody.CallbackUrl, requestBody.Amount);
                     return Ok(WebHelpers.GetReturnObject(transactionResponse.Data, transactionResponse.Status, transactionResponse.Message));
                 }
-                return Ok();
+                else
+                    return BadRequest(WebHelpers.GetReturnObject(null, false, "Failed to initiate payment. callbackUrl and amount are required"));
             }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, WebHelpers.ProcessException(e));
             }
         }
+
+        [HttpGet("{reference}")]
+        public async Task<ActionResult> VerifyPayment(string reference)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(reference))
+                {
+                    var verificationResponse = await _transactionRepository.VerifyPayment(reference);
+                    var currentUser = _transactionRepository.GetCurrentUser();
+                    PaymentTransaction transactionModel = new PaymentTransaction
+                    {
+                        TransactionReference = _transactionRepository.CreateTransactionReference(),
+                        Amount = verificationResponse.Data.Amount,
+                        UserId = currentUser.Id,
+                        Name = currentUser.Name,
+                        UserName = currentUser.UserName,
+                        Email = currentUser.Email,
+                        PhoneNumber = currentUser.PhoneNumber,
+                        StudentId = currentUser.StudentId,
+                        TransactionStatus = verificationResponse.Data.Status
+                    };
+                    _generalRepository.Add(transactionModel);
+
+                    if(await _generalRepository.SaveChangesAsync())
+                    {
+                        return Ok(WebHelpers.GetReturnObject(verificationResponse.Data, verificationResponse.Status, verificationResponse.Message));
+                    }
+                    else
+                        return BadRequest(WebHelpers.GetReturnObject(null, false, "Failed to verify payment. Transaction could not be saved."));
+                }
+                else return BadRequest(WebHelpers.GetReturnObject(null, false, "Failed to verify payment. Payment reference is required !"));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, WebHelpers.ProcessException(e));
+            }
+        }
+    }
+
+    public class TransactionInitializationRequestBody
+    {
+        public string CallbackUrl { get; set; }
+        public string Amount { get; set; }
     }
 }
