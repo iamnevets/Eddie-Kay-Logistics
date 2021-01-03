@@ -12,8 +12,9 @@ namespace BusBookingApp.Data.Models
         public string TicketNumber { get; set; }
         public int SeatNumber { get; set; }
         [Required]
-        public Destination Destination { get; set; }
-        public DateTime Date { get; set; } = DateTime.Now.ToUniversalTime();
+        public int DestinationId { get; set; }
+        public virtual Destination Destination { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now.ToUniversalTime().Date;
         public string CreatedBy { get; set; }
     }
 }

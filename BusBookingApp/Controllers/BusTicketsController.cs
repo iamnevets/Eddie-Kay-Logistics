@@ -38,8 +38,29 @@ namespace BusBookingApp.Controllers
                 {
                     _busTicketRepository.Add(busTicket);
 
+                    //var returnData = new
+                    //{
+                    //    busTicket.BusTicketId,
+                    //    busTicket.TicketNumber,
+                    //    busTicket.SeatNumber,
+
+                    //};
+
                     if (await _busTicketRepository.SaveChangesAsync())
-                        return Created("api/busTickets/create", WebHelpers.GetReturnObject(busTicket, true, "Ticket created successfully"));
+                    {
+                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Destination).Select(x => new
+                        {
+                            x.BusTicketId,
+                            x.TicketNumber,
+                            x.SeatNumber,
+                            Destination = x.Destination.Name,
+                            x.Date,
+                            x.CreatedBy
+                        });
+
+                        return Created("api/busTickets/create", WebHelpers.GetReturnObject(returnData, true, "Ticket created successfully"));
+                    }
+                        
                 }
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not create Ticket"));
