@@ -52,7 +52,6 @@ namespace BusBookingApp.Controllers
 
                         return Created("api/busTickets/create", WebHelpers.GetReturnObject(returnData, true, "Ticket created successfully"));
                     }
-                        
                 }
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not create Ticket"));
