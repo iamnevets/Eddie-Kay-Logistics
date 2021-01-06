@@ -33,7 +33,7 @@ namespace BusBookingApp.Controllers
                     _destinationRepository.Add(destination);
 
                     if (await _destinationRepository.SaveChangesAsync())
-                        return Created("api/buses/create", WebHelpers.GetReturnObject(destination, true, "Destination created successfully"));
+                        return Created("api/destinations/create", WebHelpers.GetReturnObject(destination, true, "Destination created successfully"));
                 }
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not create destination"));
@@ -88,7 +88,7 @@ namespace BusBookingApp.Controllers
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Destination could not be found. Please update an existing destination!"));
 
                 if (await _destinationRepository.UpdateAsync(destination))
-                    return Created("api/buses/update", WebHelpers.GetReturnObject(destination, true, "Destination has been updated successfully"));
+                    return Created("api/destinations/update", WebHelpers.GetReturnObject(destination, true, "Destination has been updated successfully"));
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update destination"));
             }
