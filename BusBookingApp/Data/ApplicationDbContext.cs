@@ -72,11 +72,11 @@ namespace BusBookingApp.Data
             //builder.Entity<IdentityUserRole<Guid>>().HasKey(p => new { p.UserId, p.RoleId });
 
             // Seed Data for Destination
-            builder.Entity<Destination>().HasData(new { DestinationId = 1, Name = "Accra", Fare = "GHS 30" });
-            builder.Entity<Destination>().HasData(new { DestinationId = 2, Name = "Takoradi", Fare = "GHS 30" });
-            builder.Entity<Destination>().HasData(new { DestinationId = 3, Name = "Tema", Fare = "GHS 30" });
-            builder.Entity<Destination>().HasData(new { DestinationId = 4, Name = "CapeCoast", Fare = "GHS 30" });
-            builder.Entity<Destination>().HasData(new { DestinationId = 5, Name = "Sunyani", Fare = "GHS 30" });
+            //builder.Entity<Destination>().HasData(new { DestinationId = 1, Name = "Accra", Fare = "GHS 30" });
+            //builder.Entity<Destination>().HasData(new { DestinationId = 2, Name = "Takoradi", Fare = "GHS 30" });
+            //builder.Entity<Destination>().HasData(new { DestinationId = 3, Name = "Tema", Fare = "GHS 30" });
+            //builder.Entity<Destination>().HasData(new { DestinationId = 4, Name = "CapeCoast", Fare = "GHS 30" });
+            //builder.Entity<Destination>().HasData(new { DestinationId = 5, Name = "Sunyani", Fare = "GHS 30" });
         }
     }
 }

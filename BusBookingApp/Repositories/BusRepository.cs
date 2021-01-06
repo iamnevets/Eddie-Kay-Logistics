@@ -15,23 +15,5 @@ namespace BusBookingApp.Repositories
         {
             _dbContext = dbContext;
         }
-
-        //public async Task<Bus> GetBusAsync(int busId)
-        //{
-        //  return await _dbContext.Buses.FindAsync(busId);
-        //}
-
-        //public async Task<List<Bus>> GetAllBusesAsync()
-        //{
-        //    return await _dbContext.Buses.AnyAsync() ? await _dbContext.Buses.ToListAsync() : throw new Exception("There are no buses");
-        //}
-
-        //public async Task<bool> UpdateBusAsync(Bus busToUpdate, Bus bus)
-        //{
-        //    bus.BusNumber = busToUpdate.BusNumber;
-        //    bus.NumberOfSeats = busToUpdate.NumberOfSeats;
-
-        //    return await SaveChangesAsync();
-        //}
     }
 }

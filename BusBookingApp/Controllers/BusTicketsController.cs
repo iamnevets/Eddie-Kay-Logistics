@@ -38,22 +38,14 @@ namespace BusBookingApp.Controllers
                 {
                     _busTicketRepository.Add(busTicket);
 
-                    //var returnData = new
-                    //{
-                    //    busTicket.BusTicketId,
-                    //    busTicket.TicketNumber,
-                    //    busTicket.SeatNumber,
-
-                    //};
-
                     if (await _busTicketRepository.SaveChangesAsync())
                     {
-                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Destination).Select(x => new
+                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Bus).Select(x => new
                         {
                             x.BusTicketId,
                             x.TicketNumber,
                             x.SeatNumber,
-                            Destination = x.Destination.Name,
+                            x.Bus,
                             x.Date,
                             x.CreatedBy
                         });

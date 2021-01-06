@@ -10,10 +10,9 @@ namespace BusBookingApp.Data.Models
     {
         public int BusTicketId { get; set; }
         public string TicketNumber { get; set; }
+        public int BusId { get; set; }
+        public virtual Bus Bus { get; set; }
         public int SeatNumber { get; set; }
-        [Required]
-        public int DestinationId { get; set; }
-        public virtual Destination Destination { get; set; }
         public DateTime Date { get; set; } = DateTime.Now.ToUniversalTime().Date;
         public string CreatedBy { get; set; }
     }

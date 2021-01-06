@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BusBookingApp.Data;
 using BusBookingApp.Data.Models;
@@ -17,13 +18,13 @@ namespace BusBookingApp.Controllers
     [Authorize]
     public class BusesController : ControllerBase
     {
-        private readonly DbContext _dbContext;
         private readonly IBusRepository _busRepository;
+        private readonly ApplicationDbContext _dbContext;
 
-        public BusesController(IServiceProvider serviceProvider, IBusRepository busRepository)
+        public BusesController(IServiceProvider serviceProvider, IBusRepository busRepository, ApplicationDbContext dbContext)
         {
-            _dbContext = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
             _busRepository = busRepository;
+            _dbContext = dbContext;
         }
 
         [HttpPost]
@@ -36,7 +37,17 @@ namespace BusBookingApp.Controllers
                     _busRepository.Add(bus);
 
                     if (await _busRepository.SaveChangesAsync())
+                    {
+                        var returnData = _dbContext.Buses.Where(x => x.BusId == bus.BusId).Include(x => x.Destination).Select(x => new
+                        {
+                            x.BusId,
+                            x.BusNumber,
+                            x.BusType,
+                            Destination = x.Destination.Name,
+                            x.Price
+                        });
                         return Created("api/buses/create", WebHelpers.GetReturnObject(bus, true, "Bus created successfully"));
+                    }
                 }
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not create bus"));

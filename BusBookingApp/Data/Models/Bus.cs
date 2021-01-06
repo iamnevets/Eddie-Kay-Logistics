@@ -6,11 +6,21 @@ using System.Threading.Tasks;
 
 namespace BusBookingApp.Data.Models
 {
+    public enum BusType
+    {
+        Economy,
+        Executive
+    }
+
     public class Bus
     {
         public int BusId { get; set; }
         [Required, MaxLength(10)]
         public string BusNumber { get; set; }
-        public int NumberOfSeats { get; set; } = 60;
+        public BusType BusType { get; set; }
+        [Required]
+        public int DestinationId { get; set; }
+        public virtual Destination Destination { get; set; }
+        public string Price { get; set; }
     }
 }
