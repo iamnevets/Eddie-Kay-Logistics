@@ -34,20 +34,25 @@ namespace BusBookingApp.Controllers
             {
                 if(ModelState.IsValid)
                 {
-                    _busRepository.Add(bus);
-
-                    if (await _busRepository.SaveChangesAsync())
+                   if(bus.BusType == BusType.Economy || bus.BusType == BusType.Executive)
                     {
-                        var returnData = _dbContext.Buses.Where(x => x.BusId == bus.BusId).Include(x => x.Destination).Select(x => new
+                        _busRepository.Add(bus);
+
+                        if (await _busRepository.SaveChangesAsync())
                         {
-                            x.BusId,
-                            x.BusNumber,
-                            x.BusType,
-                            Destination = x.Destination.Name,
-                            x.Price
-                        });
-                        return Created("api/buses/create", WebHelpers.GetReturnObject(bus, true, "Bus created successfully"));
+                            var returnData = _dbContext.Buses.Where(x => x.BusId == bus.BusId).Include(x => x.Destination).Select(x => new
+                            {
+                                x.BusId,
+                                x.BusNumber,
+                                x.BusType,
+                                Destination = x.Destination.Name,
+                                x.Price
+                            });
+                            return Created("api/buses/create", WebHelpers.GetReturnObject(bus, true, "Bus created successfully"));
+                        }
                     }
+                   else
+                        return BadRequest(WebHelpers.GetReturnObject(null, false, $"Could not create bus. BusType should either be {BusType.Economy} or {BusType.Executive}"));
                 }
 
                 return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not create bus"));
@@ -97,14 +102,19 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var busToUpdate = await _busRepository.GetAsync<Bus>(busId);
-                if (busToUpdate == null)
-                    return NotFound(WebHelpers.GetReturnObject(null, false, "Bus could not be found. Please update an existing bus!"));
+                if(bus.BusType == BusType.Economy || bus.BusType == BusType.Executive)
+                {
+                    var busToUpdate = await _busRepository.GetAsync<Bus>(busId);
+                    if (busToUpdate == null)
+                        return NotFound(WebHelpers.GetReturnObject(null, false, "Bus could not be found. Please update an existing bus!"));
 
-                if (await _busRepository.UpdateAsync(bus))
-                    return Created("api/buses/update", WebHelpers.GetReturnObject(bus, true, "Bus has been updated successfully"));
+                    if (await _busRepository.UpdateAsync(bus))
+                        return Created("api/buses/update", WebHelpers.GetReturnObject(bus, true, "Bus has been updated successfully"));
 
-                return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update bus"));
+                    return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update bus"));
+                }
+                else
+                    return BadRequest(WebHelpers.GetReturnObject(null, false, $"Could not update bus. BusType should either be {BusType.Economy} or {BusType.Executive}"));
             }
             catch (Exception e)
             {
