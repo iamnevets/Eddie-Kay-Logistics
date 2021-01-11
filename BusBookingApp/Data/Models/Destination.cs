@@ -9,5 +9,6 @@ namespace BusBookingApp.Data.Models
     {
         public int DestinationId { get; set; }
         public string Name { get; set; }
+        public List<Bus> Bus { get; set; }
     }
 }

@@ -66,17 +66,21 @@ namespace BusBookingApp.Data
                     .IsRequired();
             });
 
-            builder.Entity<Bus>().HasIndex(b => b.BusNumber).IsUnique();
-            builder.Entity<BusTicket>().HasIndex(b => b.TicketNumber).IsUnique();
+            // Each Bus should have a unique bus number
+            builder.Entity<Bus>(b =>
+            {
+                b.HasIndex(b => b.BusNumber)
+                .IsUnique();
+            });
+
+            // Each Ticket should have a unique ticket number
+            builder.Entity<BusTicket>(b =>
+            {
+                b.HasIndex(b => b.TicketNumber)
+                .IsUnique();
+            });
 
             //builder.Entity<IdentityUserRole<Guid>>().HasKey(p => new { p.UserId, p.RoleId });
-
-            // Seed Data for Destination
-            //builder.Entity<Destination>().HasData(new { DestinationId = 1, Name = "Accra", Fare = "GHS 30" });
-            //builder.Entity<Destination>().HasData(new { DestinationId = 2, Name = "Takoradi", Fare = "GHS 30" });
-            //builder.Entity<Destination>().HasData(new { DestinationId = 3, Name = "Tema", Fare = "GHS 30" });
-            //builder.Entity<Destination>().HasData(new { DestinationId = 4, Name = "CapeCoast", Fare = "GHS 30" });
-            //builder.Entity<Destination>().HasData(new { DestinationId = 5, Name = "Sunyani", Fare = "GHS 30" });
         }
     }
 }

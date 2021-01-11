@@ -48,7 +48,7 @@ namespace BusBookingApp.Controllers
                                 Destination = x.Destination.Name,
                                 x.Price
                             });
-                            return Created("api/buses/create", WebHelpers.GetReturnObject(bus, true, "Bus created successfully"));
+                            return Created("api/buses/create", WebHelpers.GetReturnObject(returnData, true, "Bus created successfully"));
                         }
                     }
                    else
@@ -69,7 +69,15 @@ namespace BusBookingApp.Controllers
             try
             {
                 //var bus = await _busRepository.GetBusAsync(busId);
-                var bus = await _busRepository.GetAsync<Bus>(busId);
+                var bus = _dbContext.Buses.Where(x => x.BusId == busId).Include(x => x.Destination).Select(x => new
+                {
+                    x.BusId,
+                    x.BusNumber,
+                    x.BusType,
+                    Destination = x.Destination.Name,
+                    x.Price
+                });
+
                 if (bus == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Could not find the bus"));
 
@@ -88,8 +96,21 @@ namespace BusBookingApp.Controllers
             try
             {
                 //var data = await _busRepository.GetAllBusesAsync();
-                var data = await _busRepository.GetAllAsync<Bus>();
-                return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
+                var data = _dbContext.Buses.Include(x => x.Destination).Select(x => new
+                {
+                    x.BusId,
+                    x.BusNumber,
+                    x.BusType,
+                    Destination = x.Destination.Name,
+                    x.Price
+                }).ToList();
+                if(data.Any())
+                {
+                    
+                    return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
+                }
+                else
+                    return Ok(WebHelpers.GetReturnObject(data, true, "There are no buses"));
             }
             catch (Exception e)
             {
@@ -109,7 +130,18 @@ namespace BusBookingApp.Controllers
                         return NotFound(WebHelpers.GetReturnObject(null, false, "Bus could not be found. Please update an existing bus!"));
 
                     if (await _busRepository.UpdateAsync(bus))
-                        return Created("api/buses/update", WebHelpers.GetReturnObject(bus, true, "Bus has been updated successfully"));
+                    {
+                        var updatedBus = _dbContext.Buses.Where(x => x.BusId == busId).Include(x => x.Destination).Select(x => new
+                        {
+                            x.BusId,
+                            x.BusNumber,
+                            x.BusType,
+                            x.Destination,
+                            x.Price
+                        });
+
+                        return Created("api/buses/update", WebHelpers.GetReturnObject(updatedBus, true, "Bus has been updated successfully"));
+                    }
 
                     return BadRequest(WebHelpers.GetReturnObject(null, false, "Could not update bus"));
                 }
@@ -131,6 +163,7 @@ namespace BusBookingApp.Controllers
                 if (busToDelete == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Bus could not be found. Please delete an existing bus!"));
 
+                await _dbContext.BusTickets.Where(x => x.BusId == busId).Include(x => x.Bus).ForEachAsync(x => x.Bus = null);
                 _busRepository.Delete(busToDelete);
                 if(await _busRepository.SaveChangesAsync())
                     return Ok(WebHelpers.GetReturnObject(null, true, "Bus deleted successfully"));

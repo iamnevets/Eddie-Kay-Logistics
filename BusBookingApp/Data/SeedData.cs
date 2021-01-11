@@ -98,7 +98,9 @@ namespace BusBookingApp.Data
                 var adminUser = new User
                 {
                     Name = "System Administrator",
-                    UserName = "Admin"
+                    UserName = "Admin",
+                    PhoneNumber = "0500463898",
+                    Email = "admin@gmail.com"
                 };
                 var existingUser = userManager.FindByNameAsync("Admin").Result;
                 //Admin User

@@ -40,11 +40,10 @@ namespace BusBookingApp.Controllers
 
                     if (await _busTicketRepository.SaveChangesAsync())
                     {
-                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Bus).Select(x => new
+                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Bus).IgnoreAutoIncludes().Select(x => new
                         {
                             x.BusTicketId,
                             x.TicketNumber,
-                            x.SeatNumber,
                             x.Bus,
                             x.Date,
                             x.CreatedBy
@@ -131,7 +130,7 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticketToDelete = await _busTicketRepository.GetAsync<Bus>(busTicketId);
+                var ticketToDelete = await _busTicketRepository.GetAsync<BusTicket>(busTicketId);
                 if (ticketToDelete == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Ticket could not be found. Please delete an existing ticket!"));
 

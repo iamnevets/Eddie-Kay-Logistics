@@ -4,14 +4,16 @@ using BusBookingApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BusBookingApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210109083003_CascadeDeleteMigrationUpdate")]
+    partial class CascadeDeleteMigrationUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +48,9 @@ namespace BusBookingApp.Migrations
                     b.HasIndex("BusNumber")
                         .IsUnique();
 
-                    b.HasIndex("DestinationId");
+                    b.HasIndex("DestinationId")
+                        .IsUnique()
+                        .HasFilter("[DestinationId] IS NOT NULL");
 
                     b.ToTable("Buses");
                 });
@@ -78,7 +82,9 @@ namespace BusBookingApp.Migrations
 
                     b.HasKey("BusTicketId");
 
-                    b.HasIndex("BusId");
+                    b.HasIndex("BusId")
+                        .IsUnique()
+                        .HasFilter("[BusId] IS NOT NULL");
 
                     b.HasIndex("TicketNumber")
                         .IsUnique()
@@ -383,8 +389,8 @@ namespace BusBookingApp.Migrations
             modelBuilder.Entity("BusBookingApp.Data.Models.Bus", b =>
                 {
                     b.HasOne("BusBookingApp.Data.Models.Destination", "Destination")
-                        .WithMany("Bus")
-                        .HasForeignKey("DestinationId");
+                        .WithOne("Bus")
+                        .HasForeignKey("BusBookingApp.Data.Models.Bus", "DestinationId");
 
                     b.Navigation("Destination");
                 });
@@ -392,8 +398,8 @@ namespace BusBookingApp.Migrations
             modelBuilder.Entity("BusBookingApp.Data.Models.BusTicket", b =>
                 {
                     b.HasOne("BusBookingApp.Data.Models.Bus", "Bus")
-                        .WithMany("BusTicket")
-                        .HasForeignKey("BusId");
+                        .WithOne("BusTicket")
+                        .HasForeignKey("BusBookingApp.Data.Models.BusTicket", "BusId");
 
                     b.Navigation("Bus");
                 });

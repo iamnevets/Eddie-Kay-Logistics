@@ -4,14 +4,16 @@ using BusBookingApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BusBookingApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210109060356_AnotherCascadeDelete")]
+    partial class AnotherCascadeDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,6 +38,7 @@ namespace BusBookingApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("DestinationId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Price")
@@ -46,7 +49,8 @@ namespace BusBookingApp.Migrations
                     b.HasIndex("BusNumber")
                         .IsUnique();
 
-                    b.HasIndex("DestinationId");
+                    b.HasIndex("DestinationId")
+                        .IsUnique();
 
                     b.ToTable("Buses");
                 });
@@ -67,18 +71,17 @@ namespace BusBookingApp.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("PickupDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PickupPoint")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SeatNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("TicketNumber")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("BusTicketId");
 
-                    b.HasIndex("BusId");
+                    b.HasIndex("BusId")
+                        .IsUnique()
+                        .HasFilter("[BusId] IS NOT NULL");
 
                     b.HasIndex("TicketNumber")
                         .IsUnique()
@@ -383,8 +386,9 @@ namespace BusBookingApp.Migrations
             modelBuilder.Entity("BusBookingApp.Data.Models.Bus", b =>
                 {
                     b.HasOne("BusBookingApp.Data.Models.Destination", "Destination")
-                        .WithMany("Bus")
-                        .HasForeignKey("DestinationId");
+                        .WithOne("Bus")
+                        .HasForeignKey("BusBookingApp.Data.Models.Bus", "DestinationId")
+                        .IsRequired();
 
                     b.Navigation("Destination");
                 });
@@ -392,8 +396,8 @@ namespace BusBookingApp.Migrations
             modelBuilder.Entity("BusBookingApp.Data.Models.BusTicket", b =>
                 {
                     b.HasOne("BusBookingApp.Data.Models.Bus", "Bus")
-                        .WithMany("BusTicket")
-                        .HasForeignKey("BusId");
+                        .WithOne("BusTicket")
+                        .HasForeignKey("BusBookingApp.Data.Models.BusTicket", "BusId");
 
                     b.Navigation("Bus");
                 });

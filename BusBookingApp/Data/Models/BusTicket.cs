@@ -11,7 +11,7 @@ namespace BusBookingApp.Data.Models
         public int BusTicketId { get; set; }
         public string TicketNumber { get; set; }
         public int? BusId { get; set; }
-        public virtual Bus Bus { get; set; }
+        public Bus Bus { get; set; }
         public string PickupPoint { get; set; }
         public DateTime PickupDate { get; set; }
         public DateTime Date { get; set; } = DateTime.Now.ToUniversalTime().Date;

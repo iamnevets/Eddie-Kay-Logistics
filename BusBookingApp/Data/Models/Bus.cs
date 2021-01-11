@@ -20,10 +20,9 @@ namespace BusBookingApp.Data.Models
         public string BusNumber { get; set; }
         [Required]
         public string BusType { get; set; }
-        [Required]
-        public int DestinationId { get; set; }
-        public virtual Destination Destination { get; set; }
+        public int? DestinationId { get; set; }
+        public Destination Destination { get; set; }
         public string Price { get; set; }
-        public virtual BusTicket BusTicket { get; set; }
+        public virtual List<BusTicket> BusTicket { get; set; }
     }
 }
