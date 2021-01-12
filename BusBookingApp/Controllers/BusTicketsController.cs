@@ -103,46 +103,15 @@ namespace BusBookingApp.Controllers
                     .Name;
 
                 // Get all bus tickets in the system if user is Admin, else only get the tickets for a particular user
-               // List<BusTicket> data;
+                List<BusTicket> data;
                 if (currentUserRole == "Administrator")
                 {
-                    var xList = await  _dbContext.BusTickets
-                          .Include(x => x.Bus)
-                          /*.ThenInclude(x => x.Destination)*/.ToListAsync();
-
-                   var  data = xList.Select(x => new {
-                        x.Bus.BusId,
-                        x.Bus.BusNumber,
-                        x.Bus.BusType,
-                        Destination = x.Bus?.Destination?.Name,
-                        x.Bus.Price,
-                        x.Bus.PickupPoint,
-                        x.Bus.PickupDate
-                    }).ToList();
-                    //.Select(x => new
-                    //{
-                    //    x.BusTicketId,
-                    //    x.TicketNumber,
-                    //    Bus = new
-                    //    {
-                    //x.Bus.BusId,
-                    //            x.Bus.BusNumber,
-                    //            x.Bus.BusType,
-                    //            Destination = x.Bus.Destination.Name,
-                    //            x.Bus.Price,
-                    //            x.Bus.PickupPoint,
-                    //            x.Bus.PickupDate
-                        //    },
-                        //    x.Date,
-                        //    x.CreatedBy,
-                        //    x.Status
-                        //}).ToList();
+                    data = await _dbContext.BusTickets.Include(x => x.Bus).ThenInclude(x => x.Destination).ToListAsync();
                     return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
-                    //data = tickets.ToList();
                 }
                 else
                 {
-                   var data = await _busTicketRepository.GetAllByUserAsync();
+                   data = await _busTicketRepository.GetAllByUserAsync();
                     return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
                 }
                 //return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
@@ -158,29 +127,10 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticketToUpdate = (IQueryable<BusTicket>)_dbContext.BusTickets
+                var ticketToUpdate = await _dbContext.BusTickets
                     .Where(x => x.BusTicketId == busTicketId)
                     .Include(x => x.Bus)
-                    .ThenInclude(x => x.Destination)
-                    .Select(x => new
-                    {
-                        x.BusTicketId,
-                        x.TicketNumber,
-                        Bus = new
-                        {
-                            x.Bus.BusId,
-                            x.Bus.BusNumber,
-                            x.Bus.BusType,
-                            Destination = x.Bus.Destination.Name,
-                            x.Bus.Price,
-                            x.Bus.PickupPoint,
-                            x.Bus.PickupDate
-                        },
-                        x.Date,
-                        x.CreatedBy,
-                        x.Status
-                    });
-                var returnTicket = await ticketToUpdate.FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
                 if (ticketToUpdate == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Ticket could not be found. Please update an existing ticket!"));
