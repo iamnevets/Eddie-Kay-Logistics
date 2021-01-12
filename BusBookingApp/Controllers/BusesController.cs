@@ -46,6 +46,8 @@ namespace BusBookingApp.Controllers
                                 x.BusNumber,
                                 x.BusType,
                                 Destination = x.Destination.Name,
+                                x.PickupPoint,
+                                x.PickupDate,
                                 x.Price
                             });
                             return Created("api/buses/create", WebHelpers.GetReturnObject(returnData, true, "Bus created successfully"));
@@ -75,6 +77,8 @@ namespace BusBookingApp.Controllers
                     x.BusNumber,
                     x.BusType,
                     Destination = x.Destination.Name,
+                    x.PickupPoint,
+                    x.PickupDate,
                     x.Price
                 });
 
@@ -102,6 +106,8 @@ namespace BusBookingApp.Controllers
                     x.BusNumber,
                     x.BusType,
                     Destination = x.Destination.Name,
+                    x.PickupPoint,
+                    x.PickupDate,
                     x.Price
                 }).ToList();
                 if(data.Any())
@@ -136,7 +142,9 @@ namespace BusBookingApp.Controllers
                             x.BusId,
                             x.BusNumber,
                             x.BusType,
-                            x.Destination,
+                            Destination = x.Destination.Name,
+                            x.PickupPoint,
+                            x.PickupDate,
                             x.Price
                         });
 
