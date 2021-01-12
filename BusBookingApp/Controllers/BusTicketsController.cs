@@ -50,7 +50,7 @@ namespace BusBookingApp.Controllers
                                 x.Bus.BusId,
                                 x.Bus.BusNumber,
                                 x.Bus.BusType,
-                                Destination = x.Bus.Destination.Name,
+                                x.Bus.Destination,
                                 x.Bus.Price,
                                 x.Bus.PickupPoint,
                                 x.Bus.PickupDate
