@@ -45,7 +45,7 @@ namespace BusBookingApp.PayStackApi.Repositories
             return reference;
         }
 
-        public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(string callbackUrl, string amount)
+        public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(string amount)
         {
             var transactionReference = CreateTransactionReference();
 
@@ -53,8 +53,7 @@ namespace BusBookingApp.PayStackApi.Repositories
             {
                 {"email", _currentUser.Email },
                 {"amount", amount},
-                {"reference", transactionReference },
-                {"callback_url",  callbackUrl}
+                {"reference", transactionReference }
             };
 
             var client = _clientFactory.CreateClient("paystack");

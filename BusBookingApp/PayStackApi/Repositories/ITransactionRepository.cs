@@ -9,7 +9,7 @@ namespace BusBookingApp.PayStackApi.Repositories
 {
     public interface ITransactionRepository
     {
-        Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(string callbackUrl, string amount);
+        Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(string amount);
         Task<ResponseObject<TransactionVerificationResponseData>> VerifyPayment(string reference);
         string CreateTransactionReference();
         User GetCurrentUser();

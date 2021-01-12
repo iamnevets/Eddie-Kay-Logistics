@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BusBookingApp.Data.Models;
 using BusBookingApp.Helpers;
 using BusBookingApp.PayStackApi.Models;
 using BusBookingApp.PayStackApi.Repositories;
@@ -22,17 +23,18 @@ namespace BusBookingApp.PayStackApi.Controllers
             _transactionRepository = transactionRepository;
         }
         [HttpPost]
-        public async Task<ActionResult> InitiatePayment(TransactionInitializationRequestBody requestBody)
+        public async Task<ActionResult> InitiatePayment(BusTicket ticket)
         {
             try
             {
-                if (!string.IsNullOrEmpty(requestBody.CallbackUrl) && !string.IsNullOrEmpty(requestBody.Amount))
+                var amount = ticket.Bus.Price;
+                if (!string.IsNullOrEmpty(amount))
                 {
-                    var transactionResponse = await _transactionRepository.InitiatePayment(requestBody.CallbackUrl, requestBody.Amount);
+                    var transactionResponse = await _transactionRepository.InitiatePayment(amount);
                     return Ok(WebHelpers.GetReturnObject(transactionResponse.Data, transactionResponse.Status, transactionResponse.Message));
                 }
                 else
-                    return BadRequest(WebHelpers.GetReturnObject(null, false, "Failed to initiate payment. callbackUrl and amount are required"));
+                    return BadRequest(WebHelpers.GetReturnObject(null, false, "Failed to initiate payment. Price is required"));
             }
             catch (Exception e)
             {
