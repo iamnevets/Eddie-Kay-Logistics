@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,11 +41,20 @@ namespace BusBookingApp.Controllers
 
                     if (await _busTicketRepository.SaveChangesAsync())
                     {
-                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Bus).IgnoreAutoIncludes().Select(x => new
+                        var returnData = _dbContext.BusTickets.Where(x => x.BusTicketId == busTicket.BusTicketId).Include(x => x.Bus).ThenInclude(x => x.Destination).Select(x => new
                         {
                             x.BusTicketId,
                             x.TicketNumber,
-                            x.Bus,
+                            Bus = new
+                            {
+                                x.Bus.BusId,
+                                x.Bus.BusNumber,
+                                x.Bus.BusType,
+                                Destination = x.Bus.Destination.Name,
+                                x.Bus.Price,
+                                x.Bus.PickupPoint,
+                                x.Bus.PickupDate
+                            },
                             x.Date,
                             x.CreatedBy,
                             x.Status
@@ -67,11 +77,34 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticket = await  _dbContext.BusTickets.Where(x => x.BusTicketId == busTicketId).Include(x => x.Bus).IgnoreAutoIncludes().FirstOrDefaultAsync();
+                var ticket = (IQueryable<BusTicket>) _dbContext.BusTickets
+                    .Where(x => x.BusTicketId == busTicketId)
+                    .Include(x => x.Bus)
+                    .ThenInclude(x => x.Destination)
+                    .Select(x => new
+                    {
+                        x.BusTicketId,
+                        x.TicketNumber,
+                        Bus = new
+                        {
+                            x.Bus.BusId,
+                            x.Bus.BusNumber,
+                            x.Bus.BusType,
+                            Destination = x.Bus.Destination.Name,
+                            x.Bus.Price,
+                            x.Bus.PickupPoint,
+                            x.Bus.PickupDate
+                        },
+                        x.Date,
+                        x.CreatedBy,
+                        x.Status
+                    });
+                var returnTicket = await  ticket.FirstOrDefaultAsync();
+
                 if (ticket == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Could not find the ticket"));
-
-                return Ok(WebHelpers.GetReturnObject(ticket, true, "Successful"));
+                
+                return Ok(WebHelpers.GetReturnObject(returnTicket, true, "Successful"));
             }
             catch (Exception e)
             {
@@ -85,13 +118,38 @@ namespace BusBookingApp.Controllers
             try
             {
                 var currentUser = _busTicketRepository.GetCurrentUser();
-                var currentUserRole = _dbContext.Roles.Where(x => x.Id == currentUser.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault().Name;
+                var currentUserRole = _dbContext.Roles
+                    .Where(x => x.Id == currentUser.UserRoles.FirstOrDefault().RoleId)
+                    .Include(x => x.RoleClaims)
+                    .FirstOrDefault()
+                    .Name;
 
                 // Get all bus tickets in the system if user is Admin, else only get the tickets for a particular user
-                var data = new List<BusTicket>();
+                List<BusTicket> data;
                 if (currentUserRole == "Administrator")
                 {
-                    data = await _dbContext.BusTickets.Include(x => x.Bus).IgnoreAutoIncludes().ToListAsync();
+                    data = (List<BusTicket>)_dbContext.BusTickets
+                        .Include(x => x.Bus)
+                        .ThenInclude(x => x.Destination)
+                        .Select(x => new
+                        {
+                            x.BusTicketId,
+                            x.TicketNumber,
+                            Bus = new
+                            {
+                                x.Bus.BusId,
+                                x.Bus.BusNumber,
+                                x.Bus.BusType,
+                                Destination = x.Bus.Destination.Name,
+                                x.Bus.Price,
+                                x.Bus.PickupPoint,
+                                x.Bus.PickupDate
+                            },
+                            x.Date,
+                            x.CreatedBy,
+                            x.Status
+                        });
+
                     data = data.OrderBy(x => x.CreatedBy).ToList();
                 }
                 else
@@ -111,7 +169,30 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticketToUpdate = await _dbContext.BusTickets.Where(x => x.BusTicketId == busTicketId).Include(x => x.Bus).IgnoreAutoIncludes().FirstOrDefaultAsync();
+                var ticketToUpdate = (IQueryable<BusTicket>)_dbContext.BusTickets
+                    .Where(x => x.BusTicketId == busTicketId)
+                    .Include(x => x.Bus)
+                    .ThenInclude(x => x.Destination)
+                    .Select(x => new
+                    {
+                        x.BusTicketId,
+                        x.TicketNumber,
+                        Bus = new
+                        {
+                            x.Bus.BusId,
+                            x.Bus.BusNumber,
+                            x.Bus.BusType,
+                            Destination = x.Bus.Destination.Name,
+                            x.Bus.Price,
+                            x.Bus.PickupPoint,
+                            x.Bus.PickupDate
+                        },
+                        x.Date,
+                        x.CreatedBy,
+                        x.Status
+                    });
+                var returnTicket = await ticketToUpdate.FirstOrDefaultAsync();
+
                 if (ticketToUpdate == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Ticket could not be found. Please update an existing ticket!"));
 

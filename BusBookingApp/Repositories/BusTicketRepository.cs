@@ -25,8 +25,30 @@ namespace BusBookingApp.Repositories
 
         public async Task<List<BusTicket>> GetAllByUserAsync()
         {
-            var tickets = await _dbContext.BusTickets.Where(x => x.CreatedBy == _currentUser.UserName).ToListAsync();
-            return tickets;
+            var tickets = (IQueryable<BusTicket>)_dbContext.BusTickets
+                .Where(x => x.CreatedBy == _currentUser.UserName)
+                .Include(x => x.Bus)
+                .ThenInclude(x => x.Destination)
+                .Select(x => new
+                {
+                    x.BusTicketId,
+                    x.TicketNumber,
+                    Bus = new
+                    {
+                        x.Bus.BusId,
+                        x.Bus.BusNumber,
+                        x.Bus.BusType,
+                        Destination = x.Bus.Destination.Name,
+                        x.Bus.Price,
+                        x.Bus.PickupPoint,
+                        x.Bus.PickupDate
+                    },
+                    x.Date,
+                    x.CreatedBy,
+                    x.Status
+                });
+
+            return await tickets.ToListAsync();
         }
 
         public string CreateTicketNumber()
