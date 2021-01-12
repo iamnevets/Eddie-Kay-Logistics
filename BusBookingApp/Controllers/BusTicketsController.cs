@@ -58,7 +58,7 @@ namespace BusBookingApp.Controllers
                             x.Date,
                             x.CreatedBy,
                             x.Status
-                        });
+                        }).FirstOrDefault();
 
                         return Created("api/busTickets/create", WebHelpers.GetReturnObject(returnData, true, "Ticket created successfully"));
                     }
@@ -77,34 +77,12 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticket = (IQueryable<BusTicket>) _dbContext.BusTickets
-                    .Where(x => x.BusTicketId == busTicketId)
-                    .Include(x => x.Bus)
-                    .ThenInclude(x => x.Destination)
-                    .Select(x => new
-                    {
-                        x.BusTicketId,
-                        x.TicketNumber,
-                        Bus = new
-                        {
-                            x.Bus.BusId,
-                            x.Bus.BusNumber,
-                            x.Bus.BusType,
-                            Destination = x.Bus.Destination.Name,
-                            x.Bus.Price,
-                            x.Bus.PickupPoint,
-                            x.Bus.PickupDate
-                        },
-                        x.Date,
-                        x.CreatedBy,
-                        x.Status
-                    });
-                var returnTicket = await  ticket.FirstOrDefaultAsync();
+                var ticket = await _dbContext.BusTickets.Where(x => x.BusTicketId == busTicketId).Include(x => x.Bus).ThenInclude(x => x.Destination).FirstOrDefaultAsync();
 
                 if (ticket == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Could not find the ticket"));
                 
-                return Ok(WebHelpers.GetReturnObject(returnTicket, true, "Successful"));
+                return Ok(WebHelpers.GetReturnObject(ticket, true, "Successful"));
             }
             catch (Exception e)
             {
@@ -125,38 +103,49 @@ namespace BusBookingApp.Controllers
                     .Name;
 
                 // Get all bus tickets in the system if user is Admin, else only get the tickets for a particular user
-                List<BusTicket> data;
+               // List<BusTicket> data;
                 if (currentUserRole == "Administrator")
                 {
-                    data = (List<BusTicket>)_dbContext.BusTickets
-                        .Include(x => x.Bus)
-                        .ThenInclude(x => x.Destination)
-                        .Select(x => new
-                        {
-                            x.BusTicketId,
-                            x.TicketNumber,
-                            Bus = new
-                            {
-                                x.Bus.BusId,
-                                x.Bus.BusNumber,
-                                x.Bus.BusType,
-                                Destination = x.Bus.Destination.Name,
-                                x.Bus.Price,
-                                x.Bus.PickupPoint,
-                                x.Bus.PickupDate
-                            },
-                            x.Date,
-                            x.CreatedBy,
-                            x.Status
-                        });
+                    var xList = await  _dbContext.BusTickets
+                          .Include(x => x.Bus)
+                          /*.ThenInclude(x => x.Destination)*/.ToListAsync();
 
-                    data = data.OrderBy(x => x.CreatedBy).ToList();
+                   var  data = xList.Select(x => new {
+                        x.Bus.BusId,
+                        x.Bus.BusNumber,
+                        x.Bus.BusType,
+                        Destination = x.Bus?.Destination?.Name,
+                        x.Bus.Price,
+                        x.Bus.PickupPoint,
+                        x.Bus.PickupDate
+                    }).ToList();
+                    //.Select(x => new
+                    //{
+                    //    x.BusTicketId,
+                    //    x.TicketNumber,
+                    //    Bus = new
+                    //    {
+                    //x.Bus.BusId,
+                    //            x.Bus.BusNumber,
+                    //            x.Bus.BusType,
+                    //            Destination = x.Bus.Destination.Name,
+                    //            x.Bus.Price,
+                    //            x.Bus.PickupPoint,
+                    //            x.Bus.PickupDate
+                        //    },
+                        //    x.Date,
+                        //    x.CreatedBy,
+                        //    x.Status
+                        //}).ToList();
+                    return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
+                    //data = tickets.ToList();
                 }
                 else
                 {
-                    data = await _busTicketRepository.GetAllByUserAsync();
+                   var data = await _busTicketRepository.GetAllByUserAsync();
+                    return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
                 }
-                return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
+                //return Ok(WebHelpers.GetReturnObject(data, true, "Successful"));
             }
             catch (Exception e)
             {
