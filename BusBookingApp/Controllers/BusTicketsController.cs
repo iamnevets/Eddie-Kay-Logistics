@@ -46,7 +46,8 @@ namespace BusBookingApp.Controllers
                             x.TicketNumber,
                             x.Bus,
                             x.Date,
-                            x.CreatedBy
+                            x.CreatedBy,
+                            x.Status
                         });
 
                         return Created("api/busTickets/create", WebHelpers.GetReturnObject(returnData, true, "Ticket created successfully"));
@@ -66,8 +67,8 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticket =await _busTicketRepository.GetAsync<BusTicket>(busTicketId);
-                if(ticket == null)
+                var ticket = await  _dbContext.BusTickets.Where(x => x.BusTicketId == busTicketId).Include(x => x.Bus).IgnoreAutoIncludes().FirstOrDefaultAsync();
+                if (ticket == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Could not find the ticket"));
 
                 return Ok(WebHelpers.GetReturnObject(ticket, true, "Successful"));
@@ -87,10 +88,10 @@ namespace BusBookingApp.Controllers
                 var currentUserRole = _dbContext.Roles.Where(x => x.Id == currentUser.UserRoles.FirstOrDefault().RoleId).Include(x => x.RoleClaims).FirstOrDefault().Name;
 
                 // Get all bus tickets in the system if user is Admin, else only get the tickets for a particular user
-                List<BusTicket> data;
+                var data = new List<BusTicket>();
                 if (currentUserRole == "Administrator")
                 {
-                    data = await _busTicketRepository.GetAllAsync<BusTicket>();
+                    data = await _dbContext.BusTickets.Include(x => x.Bus).IgnoreAutoIncludes().ToListAsync();
                     data = data.OrderBy(x => x.CreatedBy).ToList();
                 }
                 else
@@ -110,7 +111,7 @@ namespace BusBookingApp.Controllers
         {
             try
             {
-                var ticketToUpdate = await _busTicketRepository.GetAsync<Bus>(busTicketId);
+                var ticketToUpdate = await _dbContext.BusTickets.Where(x => x.BusTicketId == busTicketId).Include(x => x.Bus).IgnoreAutoIncludes().FirstOrDefaultAsync();
                 if (ticketToUpdate == null)
                     return NotFound(WebHelpers.GetReturnObject(null, false, "Ticket could not be found. Please update an existing ticket!"));
 
