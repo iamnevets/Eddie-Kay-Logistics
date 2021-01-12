@@ -45,14 +45,15 @@ namespace BusBookingApp.PayStackApi.Repositories
             return reference;
         }
 
-        public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(string amount)
+        public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(decimal amount)
         {
+            amount *= 100;
             var transactionReference = CreateTransactionReference();
 
             var values = new Dictionary<string, string>
             {
                 {"email", _currentUser.Email },
-                {"amount", amount},
+                {"amount", amount.ToString()},
                 {"reference", transactionReference }
             };
 
