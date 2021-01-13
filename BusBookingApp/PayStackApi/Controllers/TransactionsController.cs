@@ -30,7 +30,8 @@ namespace BusBookingApp.PayStackApi.Controllers
                 var amount = ticket.Bus.Price;
                 if (!string.IsNullOrEmpty(amount))
                 {
-                    var transactionResponse = await _transactionRepository.InitiatePayment(amount);
+                    var price = Convert.ToDecimal(amount);
+                    var transactionResponse = await _transactionRepository.InitiatePayment(price);
                     return Ok(WebHelpers.GetReturnObject(transactionResponse.Data, transactionResponse.Status, transactionResponse.Message));
                 }
                 else
