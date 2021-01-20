@@ -45,7 +45,7 @@ namespace BusBookingApp.PayStackApi.Repositories
 
             var lastThreeDigitsOfPhoneNumber = _currentUser.PhoneNumber.Substring(6, 3);
 
-            var reference = $"GH-{date}-{time}-{ lastThreeDigitsOfPhoneNumber}";
+            var reference = $"GH-{date}-{time}-{lastThreeDigitsOfPhoneNumber}";
             return reference;
         }
 
