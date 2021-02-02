@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Quartz;
 using Quartz.Impl;
+using Quartz.Spi;
 
 namespace BusBookingApp
 {
@@ -99,18 +100,16 @@ namespace BusBookingApp
                 c.DefaultRequestHeaders.Add("Authorization", $"Bearer {Configuration.GetSection("PayStackService").GetSection("SecretKey").Value}");
             });
 
-            // Adding QUARTZ for background tasks and scheduling
-            //services.AddQuartz(q =>
-            //{
-            //    q.UseMicrosoftDependencyInjectionScopedJobFactory();
+            // Add Quartz services
+            services.AddSingleton<IJobFactory, MyJobFactory>();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddHostedService<QuartzHostedService>();
 
-            //    q.AddJobAndTrigger<PaymentVerificationJob>(Configuration);
-            //});
-            //services.AddQuartzHostedService(
-            //        q => q.WaitForJobsToComplete = true);
-            //var scheduler = StdSchedulerFactory.GetDefaultScheduler().GetAwaiter().GetResult();
-            //services.AddSingleton(scheduler);
-            //services.AddHostedService<CustomQuartzHostedService>();
+            // Add our job
+            services.AddSingleton<PaymentVerificationJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(PaymentVerificationJob),
+                cronExpression: "0/5 * * * * ?")); // run every 5 seconds
 
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers().AddNewtonsoftJson(options =>

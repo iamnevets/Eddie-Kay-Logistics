@@ -54,7 +54,7 @@ namespace BusBookingApp.PayStackApi.Controllers
                     var currentUser = _transactionRepository.GetCurrentUser();
                     PaymentTransaction transactionModel = new PaymentTransaction
                     {
-                        TransactionReference = _transactionRepository.CreateTransactionReference(),
+                        TransactionReference = _transactionRepository.CreateTransactionReference(currentUser),
                         Amount = verificationResponse.Data.Amount,
                         UserId = currentUser.Id,
                         Name = currentUser.Name,

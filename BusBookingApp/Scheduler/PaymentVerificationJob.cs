@@ -1,39 +1,40 @@
-﻿//using BusBookingApp.PayStackApi.Repositories;
-//using Microsoft.Extensions.Logging;
-//using Quartz;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
+﻿using BusBookingApp.PayStackApi.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Quartz;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-//namespace BusBookingApp.Scheduler
-//{
-//    [DisallowConcurrentExecution]
-//    public class PaymentVerificationJob : IJob
-//    {
-//        private readonly ILogger<PaymentVerificationJob> _logger;
-//        private readonly ITransactionRepository _transactionRepository;
+namespace BusBookingApp.Scheduler
+{
+    [DisallowConcurrentExecution]
+    public class PaymentVerificationJob : IJob
+    {
+        private readonly IServiceProvider _serviceProvider;
 
-//        public PaymentVerificationJob(ILogger<PaymentVerificationJob> logger, ITransactionRepository transactionRepository)
-//        {
-//            _logger = logger;
-//            _transactionRepository = transactionRepository;
-//        }
+        public PaymentVerificationJob(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
 
-//        public Task Execute(IJobExecutionContext context)
-//        {
-//            try
-//            {
-//                _logger.LogInformation("Starting payment verification");
-//                var verifyPayment = _transactionRepository.VerifyPayment();
-//                return Task.FromResult(verifyPayment);
-//            }
-//            catch (Exception e)
-//            {
-//                _logger.LogInformation(e.Message);
-//            }
+        public async Task Execute(IJobExecutionContext context)
+        {
+            try
+            {
+                using(var scope = _serviceProvider.CreateScope())
+                {
+                    Console.WriteLine("+++++ Payment verification job running ... ");
 
-//            return Task.FromResult(0);
-//        }
-//    }
-//}
+                    var transactionRepo = scope.ServiceProvider.GetService<ITransactionRepository>();
+                    await transactionRepo.VerifyPayment();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+    }
+}

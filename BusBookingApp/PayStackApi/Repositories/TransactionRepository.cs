@@ -17,16 +17,16 @@ namespace BusBookingApp.PayStackApi.Repositories
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _clientFactory;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly User _currentUser;
+        //private readonly User _currentUser;
 
-        private string _reference;
+        private string _reference = "";
 
         public TransactionRepository(ApplicationDbContext dbContext, IHttpClientFactory clientFactory, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _clientFactory = clientFactory;
             _httpContextAccessor = httpContextAccessor;
-            _currentUser = GetCurrentUser();
+            //_currentUser = GetCurrentUser();
         }
 
         public User GetCurrentUser()
@@ -37,13 +37,13 @@ namespace BusBookingApp.PayStackApi.Repositories
             return currentUser;
         }
 
-        public string CreateTransactionReference()
+        public string CreateTransactionReference(User currentUser)
         {
             var time = DateTime.UtcNow.ToString("hh:mm:ss").Replace(":", "");
             var date = DateTime.UtcNow.Date.ToShortDateString().Replace("/", "");
             Console.WriteLine(date);
 
-            var lastThreeDigitsOfPhoneNumber = _currentUser.PhoneNumber.Substring(6, 3);
+            var lastThreeDigitsOfPhoneNumber = currentUser.PhoneNumber.Substring(6, 3);
 
             var reference = $"GH-{date}-{time}-{lastThreeDigitsOfPhoneNumber}";
             return reference;
@@ -51,14 +51,15 @@ namespace BusBookingApp.PayStackApi.Repositories
 
         public async Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(decimal price, BusTicket busTicket)
         {
+            var currentUser = GetCurrentUser();
             price *= 100;
             var amount = price.ToString("0.00");
-            var transactionReference = CreateTransactionReference();
+            var transactionReference = CreateTransactionReference(currentUser);
             var ticket = JsonSerializer.Serialize(busTicket);
 
             var values = new Dictionary<string, string>
             {
-                {"email", _currentUser.Email },
+                {"email", currentUser.Email },
                 {"amount", amount},
                 {"reference", transactionReference },
                 {"custom_fields", ticket }
@@ -90,14 +91,17 @@ namespace BusBookingApp.PayStackApi.Repositories
             client.DefaultRequestHeaders.Remove("Accept");
             var response = await client.GetAsync("https://api.paystack.co/transaction/verify/" + _reference);
 
-            ResponseObject<TransactionVerificationResponseData> returnObject = null;
+            ResponseObject<TransactionVerificationResponseData> returnObject;
             if (response.IsSuccessStatusCode)
             {
                 returnObject = await response.Content.ReadFromJsonAsync<ResponseObject<TransactionVerificationResponseData>>();
             }
             else
             {
-                returnObject.Message = response.ReasonPhrase;
+                returnObject = new ResponseObject<TransactionVerificationResponseData>
+                {
+                    Message = response.ReasonPhrase
+                };
             }
 
             return returnObject;

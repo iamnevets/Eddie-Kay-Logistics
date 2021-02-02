@@ -12,7 +12,7 @@ namespace BusBookingApp.PayStackApi.Repositories
     {
         Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(decimal amount, BusTicket busTicket);
         Task<ResponseObject<TransactionVerificationResponseData>> VerifyPayment();
-        string CreateTransactionReference();
+        string CreateTransactionReference(User currentUser);
         User GetCurrentUser();
     }
 }
