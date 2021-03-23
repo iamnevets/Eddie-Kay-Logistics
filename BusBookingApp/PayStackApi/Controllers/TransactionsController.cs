@@ -31,7 +31,7 @@ namespace BusBookingApp.PayStackApi.Controllers
                 if (!string.IsNullOrEmpty(amount))
                 {
                     var price = Convert.ToDecimal(amount);
-                    var transactionResponse = await _transactionRepository.InitiatePayment(price);
+                    var transactionResponse = await _transactionRepository.InitiatePayment(price, ticket);
                     return Ok(WebHelpers.GetReturnObject(transactionResponse.Data, transactionResponse.Status, transactionResponse.Message));
                 }
                 else
@@ -50,11 +50,11 @@ namespace BusBookingApp.PayStackApi.Controllers
             {
                 if (!string.IsNullOrEmpty(reference))
                 {
-                    var verificationResponse = await _transactionRepository.VerifyPayment(reference);
+                    var verificationResponse = await _transactionRepository.VerifyPayment();
                     var currentUser = _transactionRepository.GetCurrentUser();
                     PaymentTransaction transactionModel = new PaymentTransaction
                     {
-                        TransactionReference = _transactionRepository.CreateTransactionReference(),
+                        TransactionReference = _transactionRepository.CreateTransactionReference(currentUser),
                         Amount = verificationResponse.Data.Amount,
                         UserId = currentUser.Id,
                         Name = currentUser.Name,

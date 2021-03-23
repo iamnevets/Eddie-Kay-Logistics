@@ -1,4 +1,5 @@
 ﻿using BusBookingApp.Data;
+using BusBookingApp.Data.Models;
 using BusBookingApp.PayStackApi.Models;
 using System;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ namespace BusBookingApp.PayStackApi.Repositories
 {
     public interface ITransactionRepository
     {
-        Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(decimal amount);
-        Task<ResponseObject<TransactionVerificationResponseData>> VerifyPayment(string reference);
-        string CreateTransactionReference();
+        Task<ResponseObject<TransactionInitializationResponseData>> InitiatePayment(decimal amount, BusTicket busTicket);
+        Task<ResponseObject<TransactionVerificationResponseData>> VerifyPayment();
+        string CreateTransactionReference(User currentUser);
         User GetCurrentUser();
     }
 }

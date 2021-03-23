@@ -2,9 +2,11 @@ using System;
 using System.Text;
 using AutoMapper;
 using BusBookingApp.Data;
+using BusBookingApp.ExtensionMethods;
 using BusBookingApp.PayStackApi.Repositories;
 //using BusBookingApp.PayStackApi.Repositories;
 using BusBookingApp.Repositories;
+using BusBookingApp.Scheduler;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +17,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 
 namespace BusBookingApp
 {
@@ -74,6 +79,7 @@ namespace BusBookingApp
                 };
             });
 
+            // Adding CORS, and HttpClient for paystack
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
@@ -93,6 +99,17 @@ namespace BusBookingApp
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
                 c.DefaultRequestHeaders.Add("Authorization", $"Bearer {Configuration.GetSection("PayStackService").GetSection("SecretKey").Value}");
             });
+
+            // Add Quartz services
+            services.AddSingleton<IJobFactory, MyJobFactory>();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            services.AddHostedService<QuartzHostedService>();
+
+            // Add our job
+            services.AddSingleton<PaymentVerificationJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(PaymentVerificationJob),
+                cronExpression: "0/5 * * * * ?")); // run every 5 seconds
 
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers().AddNewtonsoftJson(options =>
