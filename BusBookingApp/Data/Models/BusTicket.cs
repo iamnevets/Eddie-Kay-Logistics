@@ -20,6 +20,6 @@ namespace BusBookingApp.Data.Models
         public Bus Bus { get; set; }
         public DateTime Date { get; set; } = DateTime.Now.ToUniversalTime().Date;
         public string CreatedBy { get; set; }
-        public Status Status { get; set; } = Status.Pending;
+        public string Status { get; set; } = "Pending";
     }
 }

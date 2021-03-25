@@ -20,6 +20,8 @@ namespace BusBookingApp.PayStackApi.Repositories
         //private readonly User _currentUser;
 
         private string _reference = "";
+        private bool _paymentInitiatedSuccessfully = false;
+        private BusTicket _busTicketCurrentlyBeingBooked = new BusTicket();
 
         public TransactionRepository(ApplicationDbContext dbContext, IHttpClientFactory clientFactory, IHttpContextAccessor httpContextAccessor)
         {
@@ -76,6 +78,10 @@ namespace BusBookingApp.PayStackApi.Repositories
 
                 //Assign the reference from the response to _reference to be used for verification of payment
                 _reference = returnObject.Data.Reference;
+
+                //Check if payment initiated successfully, so busTicket can be used in the verifyPayment function
+                _paymentInitiatedSuccessfully = true;
+                _busTicketCurrentlyBeingBooked = busTicket;
             }
             else
             {
@@ -95,6 +101,11 @@ namespace BusBookingApp.PayStackApi.Repositories
             if (response.IsSuccessStatusCode)
             {
                 returnObject = await response.Content.ReadFromJsonAsync<ResponseObject<TransactionVerificationResponseData>>();
+
+                if(_paymentInitiatedSuccessfully)
+                {
+                    _busTicketCurrentlyBeingBooked.Status = returnObject.Data.Status;
+                }
             }
             else
             {
