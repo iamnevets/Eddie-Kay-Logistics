@@ -104,7 +104,7 @@ namespace BusBookingApp.PayStackApi.Repositories
 
                 if(_paymentInitiatedSuccessfully)
                 {
-                    _busTicketCurrentlyBeingBooked.Status = returnObject.Data.Status;
+                    _busTicketCurrentlyBeingBooked.NewStatus = returnObject.Data.Status;
                 }
             }
             else
